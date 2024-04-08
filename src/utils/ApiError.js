@@ -7,7 +7,7 @@ class ApiError extends Error {
     statusCode,
     message = "Something went wrong",
     errors = [],
-    statck = ""
+    stack = ""
   ) {
     // Call the constructor of the Error class with the provided message.
     super(message);
@@ -26,9 +26,9 @@ class ApiError extends Error {
     this.success = false;
 
     // Check if a custom stack trace (statck) is provided.
-    if (statck) {
+    if (stack) {
       // If provided, set the stack property of the ApiError instance to the custom stack.
-      this.stack = statck;
+      this.stack = this.stack;
     } else {
       // If not provided, capture the stack trace using Error.captureStackTrace().
       // This is useful for properly logging where the error occurred in the code.
