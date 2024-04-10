@@ -16,7 +16,6 @@ const registerUser = asyncHandler(async (req, res) => {
   //9th return response
 
   const { fullName, email, username, password } = req.body;
-  console.log(`email: ${email}, username: ${username}`);
 
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -24,7 +23,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ email }, { username }],
   });
   if (existedUser) {
@@ -32,17 +31,23 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocaLPath = req.files?.coverImage[0]?.path;
+  //const coverImageLocaLPath = req.files?.coverImage[0]?.path;
+  let coverImageLocalPath;
+  if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+    coverImageLocalPath = req.files.coverImage[0].path;
+  } else{
+    coverImageLocalPath = "";
+  }
 
   if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar image is required");
+    throw new ApiError(400, "Avatar image is required 1");
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverImageLocaLPath);
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!avatar) {
-    throw new ApiError(400, "Avatar image is required");
+    throw new ApiError(400, "Avatar image is required 2");
   }
 
   const user = await User.create({
@@ -53,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     username: username.toLowerCase(),
   });
-  const createdUser = User.findById(user._id).select("-password -refreshToken");
+  const createdUser = (await User.findById(user._id).select("-password -refreshToken")).toObject();
 
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
@@ -61,7 +66,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        createdUser,
+        "User registered successfully"
+      )
+    );
 });
 
 export { registerUser };
