@@ -89,7 +89,7 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 // This is a method on the userSchema that generates a refresh token for a user.
-userSchema.methods.generateRefreshToken = async function () {
+userSchema.methods.generateRefreshToken = function () {
   // Use jsonwebtoken's sign method to create a new JWT. The payload only includes the user's id.
   return jwt.sign(
     {
